@@ -87,3 +87,30 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+
+*sublime*
+*~
+*.swp
+.tmp
+
+*.elc
+.DS_Store
+._*
+*.pyc
+Thumbs.db
+.pydevproject
+.project
+.settings
+*.orig
+*.ipr
+*.iws
+*.iml
+.idea
+*.back
+pip-log.txt
+*.swp
+*.swo
+.vagrant/
+.bundle/
+_build

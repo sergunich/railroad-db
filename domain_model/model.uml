@@ -1,0 +1,62 @@
+@startuml
+title Чат для Недвижки
+
+scale 1.5
+
+
+note as _descriptions
+Station
+  name
+  code
+
+Route
+  name
+  - list of Stations
+
+? Segments
+  - segment of railroad from one station to another
+
+Train
+  route
+  name(number)
+  departure_datetime
+  - assigned to route and concrete departure and arrival time
+  - not specific real-life train
+  - different Train for every departure
+
+Wagon
+  train
+  number
+  type [second-class carriage, compartment, VIP]
+  - list of seats
+
+Seats
+  number
+  - reserved from Station to Station (not necessarily full Route)
+  - can be assigned to different people on different segments of route
+
+Ticket
+  seat
+  passenget_info
+  price - depends on Wagon.type and Route segment
+  hash_with_secret
+  buyed_datetime
+  - reserves seat in Train from Station to Station
+end note
+
+note as _usecases
+- find empty seats in the train from one station to another
+- find simple route from one station to another (without train change)
+- find train from ane station to another for particular data
+
+
+end note
+
+note as _prconditions
+Preconditions for simplification
+- ticket per seat (only reserved seating, no free seating)
+
+end note
+
+
+@enduml

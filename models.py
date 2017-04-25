@@ -73,10 +73,9 @@ class Reservation(models.Model):
 
 ## What Voyages can I use to went from Station A to Station B?
 #TODO: exclue voyages where end segment earlier then start segment
-voyages = Voyage.objects.filter(
-    segment__start_station__name='Station A',
-    segment__end_station__name='Station B',
-)
+voyages = Voyage.objects \
+    .filter(segment__start_station__name='Station A') \
+    .filter(segment__end_station__name='Station B')
 print voyages
 
 

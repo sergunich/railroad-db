@@ -72,10 +72,19 @@ class Reservation(models.Model):
 # Achtung! This are just drafts of code!  Never ran them nor did test them
 
 ## What Voyages can I use to went from Station A to Station B?
-#TODO: exclue voyages where end segment earlier then start segment
-voyages = Voyage.objects \
+#TODO: exclude voyages where end segment earlier then start segment in SQL?
+voyages_including_wrong_directions = Voyage.objects \
     .filter(segment__start_station__name='Station A') \
     .filter(segment__end_station__name='Station B')
+
+
+voyages = []
+for voyage in voyages_including_wrong_directions:
+    start_segment = voyage.segments.get(start_station__name='Station A')
+    end_segment = voyage.segments.get(end_station__name='Station B')
+    if start_segment.seq_in_route < end_segment.seq_in_route: # good Voyage direction
+        voyages.append(voyage)
+
 print voyages
 
 

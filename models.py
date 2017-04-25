@@ -5,7 +5,7 @@ from django.db import models
 #TODO:
 #   - verbose_names
 #   - on_delete constraints
-#   - 
+#   - other useful options...
 
 class Station(models.Model):
     name = models.ChatField(max_length=200)
@@ -31,7 +31,7 @@ class Voyage(models.Model):
     Not physical path between Stations,
     but voyage direction, like: Red Arrow (Msc - Spb)
     """
-    name = models.ChatField(max_length=200)
+    name = models.CharField(max_length=200)
 
 
 class Train(models.Model):
@@ -61,7 +61,8 @@ class Ticket(models.Model):
 
 
 class Reservation(models.Model):
-    seat = models.ForeignKey(Seat, related_name)
+    seat = models.ForeignKey(Seat, related_name='reservations',
+                             related_query_name='reservation')
     ticket = models.ForeignKey(Ticket)
     segment = models.ForeignKey(Segment)
 
@@ -78,6 +79,7 @@ voyages = Voyage.objects.filter(
 )
 print voyages
 
+
 ## Ok. Show me iteranary for Voyage.
 voyage = voyages[0] # pick first voyage (for example)
 
@@ -85,6 +87,7 @@ segments = voyage.segments.all().orged_by('seq_in_route')
 print segments[0].start_station.name
 for segment in segments:
     print segment.end_station.name
+
 
 ## Nice. Are there trains for particular date (23.07.2017)?
 #First, we need to calc route time between route start and 'Station A'
@@ -98,13 +101,37 @@ trains = Train.objects.filter(
     depature__lt=date('23.07.2017').end_of_day - route_time
 )
 
-## Great. Do we have seats in this train?
+
+## Great. Do we have available seats in VIP wagon in this train for my path?
 train = trains[0] # pick first train (for example)
 
-seats = Seat.obejcts.filter(
-    wagon__train=train,
+my_start_segment = segments.get(start_station='Station A')
+my_end_segment = segments.get(end_station='Station B')
+segments_in_my_path = segments.filter(
+    seq_in_route__gte=my_start_segment.seq_in_route,
+    seq_in_route__lte=my_end_segment.seq_in_route
+).order_by('seq_in_route')
 
+available_seats = Seat.obejcts.filter(
+    wagon__train=train,
+    wagon__kind='VIP',
+    # without reservation           without reservations for segments in my path
+    Q(reservation__isnull=True) | ~Q(reservation__segment__in=segments_in_my_path)
 )
+
+## I'll take it!
+my_seat = available_seats[0] # pick first available seat (for example)
+
+my_ticket = Ticket(passanger_info="Sergey", price=100)
+my_ticket.save()
+#reserve seat for segments
+for segment in segments_in_my_path:
+    Reservation(seat=my_seat, ticket=my_ticket, segment=segment).save()
+
+
+##Done!
+print 'Ticket: {0}'.format(my_ticket)
+
 
 
 
